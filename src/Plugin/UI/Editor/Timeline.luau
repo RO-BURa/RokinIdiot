@@ -1682,6 +1682,12 @@ function Timeline:_rebindValueWatcher()
 end
 
 function Timeline:_captureIntoSelection(track, instance: Instance)
+	-- 미리보기가 꺼져 있으면 받아 적지 않는다. 스튜디오에서 오브젝트를
+	-- 그냥 만질 때 골라둔 키가 따라 바뀌면 안 된다.
+	if not self._player:IsEnabled() then
+		return
+	end
+
 	-- 미리보기가 쓴 값이면 받아 적지 않는다. 그러면 재생헤드가 지나갈 때마다
 	-- 골라둔 키가 제 값을 잃는다.
 	if self._player:IsApplying() or self._player:IsPlaying() then
