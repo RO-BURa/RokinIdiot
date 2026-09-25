@@ -89,7 +89,9 @@ end
 -- 못 찾은 것도 false로 기억해서 없는 경로를 매 프레임 다시 뒤지지 않는다.
 function Applier:Resolve(track): Instance?
 	local cached = self._resolved[track]
-	if cached ~= nil then
+	-- 잡아둔 것이 지워졌으면 (파티클을 새로 갈아 끼운 경우 등) 다시 푼다.
+	-- Parent 하나 읽는 값이라 매 프레임 봐도 싸다.
+	if cached ~= nil and (cached == false or cached.Parent ~= nil) then
 		return if cached == false then nil else cached
 	end
 

@@ -38,4 +38,4 @@ rojo sourcemap default.project.json -o sourcemap.json
 - [x] 1단계 — 위젯 / 홈 / Recent / 저장·잠금 / 테마 / TopBar
 - [~] 2단계 — 아이템·엘리먼트·트랙 트리와 타임라인 (키프레임 편집 남음)
 - [ ] 3단계 — 미리보기 재생 + Motor6D 포즈 캡처
-- [ ] 4단계 — 런타임 패키지 분리
+- [x] 4단계 — 런타임 패키지 분리

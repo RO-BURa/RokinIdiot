@@ -249,9 +249,13 @@ Transform    = (Part0.CFrame * C0):Inverse() * Part1.CFrame * C1
 
 ### Animator 충돌
 
-플레이어 캐릭터처럼 Animator가 살아있는 리그에 입힐 때는
-`BindToRenderStep`을 `Enum.RenderPriority.Character.Value + 1`로 잡아
-기본 Animator보다 나중에 덮어쓴다.
+플레이어 캐릭터처럼 Animator가 살아있는 리그에 입힐 때는 기본 Animator보다
+나중에 덮어써야 한다. 에디터 미리보기와 런타임 모두 **`RunService.Heartbeat`**
+에서 돈다. 한 프레임 안에서 Animator가 `Transform`을 쓴 뒤라 우리가 쓴 포즈가
+그대로 그려진다.
+
+`BindToRenderStep`은 쓰지 않는다. 서버에는 없어서 런타임이 서버에서 돌 때
+갈라지고, 에디터(편집 모드)와 게임이 다른 타이밍을 쓰게 된다. 한 곳으로 모은다.
 
 ### 보간
 
@@ -313,7 +317,12 @@ Transform    = (Part0.CFrame * C0):Inverse() * Part1.CFrame * C1
    - [x] `motor6d` 트랙 + 뷰포트 포즈 캡처 (`Capture Rig Pose`)
    - [x] `transform` 트랙 (Origin Item 기준 상대 위치, `Capture Position`)
    - [ ] 본 마스킹, 스크럽 중 메소드 호출 여부 옵션
-4. 런타임 패키지 분리
+4. ~~런타임 패키지 분리~~ 완료
+   - [x] `Core/Applier` 분리, `Core`가 플러그인을 모르게
+   - [x] `LoadAnimation` / `Play` / `Stop` / 페이드 / 배속·역재생 / 반복
+   - [x] 우선순위·비중 중재 (`Arbiter`), 멈추면 원래 값 복원
+   - [x] 키프레임·마커 신호, `GetTimeOfKeyframe`
+   - [x] 영어·한국어 문서 (`Docs`)
 
 ## 나중에
 
