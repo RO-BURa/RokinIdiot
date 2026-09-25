@@ -106,6 +106,7 @@ return {
 	["topbar.export"] = "Export Animation to Workspace",
 	["topbar.exportPlayer"] = "Export Player to Workspace",
 	["topbar.followSelection"] = "Playhead follows selected keyframe",
+	["topbar.deselectOnScrub"] = "Deselect keyframes when scrubbing",
 	["topbar.showMarkers"] = "Show keyframe lane",
 	["topbar.deselectWhilePlaying"] = "Deselect while playing",
 

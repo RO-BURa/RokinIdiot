@@ -1797,8 +1797,10 @@ function Timeline:_setupScrubbing()
 		if self._scrubbing then
 			return
 		end
-		-- 눈금자를 누른 것도 키 바깥을 누른 것이다.
-		self._state:SelectFrame(nil)
+		-- 키 선택을 풀지는 옵션이 정한다 (기본은 그대로 둔다).
+		if ViewOptions.IsDeselectOnScrubEnabled() then
+			self._state:SelectFrame(nil)
+		end
 		self._scrubbing = true
 		self:_scrubToMouse()
 

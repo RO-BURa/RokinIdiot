@@ -46,4 +46,22 @@ function ViewOptions.SetFollowSelection(enabled: boolean)
 	ViewOptions.Changed:Fire()
 end
 
+-- 눈금자·키프레임 줄·재생헤드 손잡이로 재생헤드를 옮길 때 키 선택을 풀지.
+--
+-- 기본은 풀지 않는다. 키를 골라둔 채로 재생헤드를 끌며 앞뒤 모습을
+-- 확인하는 게 자연스럽다.
+local DESELECT_ON_SCRUB_SETTING = "deselectOnScrub"
+
+function ViewOptions.IsDeselectOnScrubEnabled(): boolean
+	return PluginEnv.GetSetting(DESELECT_ON_SCRUB_SETTING, false) == true
+end
+
+function ViewOptions.SetDeselectOnScrub(enabled: boolean)
+	if enabled == ViewOptions.IsDeselectOnScrubEnabled() then
+		return
+	end
+	PluginEnv.SetSetting(DESELECT_ON_SCRUB_SETTING, enabled)
+	ViewOptions.Changed:Fire()
+end
+
 return ViewOptions
