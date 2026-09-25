@@ -59,6 +59,9 @@ function Player.new(state)
 		_wroteThisFrame = false,
 		_wroteLastFrame = false,
 
+		-- 우리가 쓴 값의 변경 이벤트가 아직 안 끝났으면 0보다 크다 (IsApplying).
+		_applying = 0,
+
 		Changed = Signal.new(),
 	}, Player)
 
@@ -404,14 +407,23 @@ function Player:ApplyAt(time: number, fromTime: number?)
 	-- 우리가 쓰는 동안임을 밖에서 알 수 있게 표시해둔다.
 	-- 속성 변경을 듣고 키에 적어넣는 쪽이 우리가 쓴 값까지 받아 적으면
 	-- 재생헤드가 지나갈 때마다 키가 제멋대로 바뀐다.
-	self._applying = true
+	--
+	-- 속성 변경 이벤트는 Deferred라 쓰는 순간이 아니라 큐 뒤에서 나중에 온다.
+	-- 쓰고 바로 표시를 내리면 이벤트가 올 때쯤엔 이미 꺼져 있다. 그래서
+	-- defer로 그 이벤트들 뒤에 줄을 세워 내린다 (한 번 더 기다려 여유를 둔다).
+	-- 한 프레임에 여러 번 불리면 먼저 내린 쪽이 뒤 이벤트를 놓치므로 숫자로 센다.
+	self._applying += 1
 	self._applier:ApplyAt(time, fromTime)
-	self._applying = false
+	task.defer(function()
+		task.defer(function()
+			self._applying -= 1
+		end)
+	end)
 end
 
--- 지금 이 순간 우리가 값을 쓰고 있는가.
+-- 우리가 쓴 값의 변경 이벤트가 아직 오는 중인가.
 function Player:IsApplying(): boolean
-	return self._applying == true
+	return self._applying > 0
 end
 
 -- 스냅샷에 적어둔 원래 값. 첫 키 앞 구간을 여기서부터 잇는다.

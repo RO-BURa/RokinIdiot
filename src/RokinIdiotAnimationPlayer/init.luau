@@ -201,7 +201,9 @@ end, {
 		-- 모인 값을 중재해서 실제로 쓴다. 아무도 안 맡긴 자리는 여기서 원복된다.
 		self._arbiter:Flush()
 
-		if not anyPlaying then
+		-- 마지막 트랙이 이번 프레임에 끝났어도 그 트랙이 잡은 값은 방금 쓰였다.
+		-- 되돌리는 건 다음 Flush라서, 들고 있는 자리가 없어질 때까지 더 돈다.
+		if not anyPlaying and self._arbiter:IsIdle() then
 			self:_stopStepping()
 		end
 	end,

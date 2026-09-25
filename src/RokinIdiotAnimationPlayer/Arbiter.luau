@@ -26,6 +26,9 @@ Arbiter.__index = Arbiter
 function Arbiter.new()
 	return setmetatable({
 		-- [instance][property] = { 원래값 }  (값 자체가 nil일 수 있어 한 겹 감싼다)
+		-- 놓아준 자리는 Flush에서 지운다. 인스턴스를 약한 키로 두지 않는 이유는
+		-- 로블록스가 Instance 래퍼를 버렸다가 새로 만들 수 있어서다. 그러면
+		-- 되돌리기 전에 원래 값이 사라진다.
 		_snapshot = {},
 		-- [instance][property] = { claim, ... }  이번 프레임에 모인 것
 		_claims = {},
@@ -118,6 +121,8 @@ function Arbiter:Claim(track, instance: Instance, property: string, value: any, 
 		priority = track.Priority,
 		weight = track.WeightCurrent,
 		order = track._order,
+		-- 페이드아웃 중인가. 섞을 수 없는 값은 이때 0에 닿을 때까지 들고 있는다.
+		stopping = track._stopping == true,
 	})
 end
 
@@ -178,10 +183,13 @@ const function blend(valueType: string?, kept, base: any): any
 end
 
 -- 섞을 수 없는 값. 비중이 1에 닿은 것 중 먼저 시작한 쪽이 가져간다.
+-- 페이드아웃 중인 것은 비중이 0에 닿을 때까지 1에 닿은 것으로 친다.
+-- 페이드인은 1에 닿아야 켜지고 페이드아웃은 0에 닿아야 꺼진다.
 const function pick(kept): any
 	local best = nil
 	for _, claim in kept do
-		if claim.weight < FULL then
+		const holding = claim.weight >= FULL or (claim.stopping and claim.weight > 0)
+		if not holding then
 			continue
 		end
 		if best == nil or claim.order < best.order then
@@ -233,6 +241,17 @@ function Arbiter:Flush()
 				self:_restore(instance, property)
 			end
 			properties[property] = nil
+
+			-- 적어둔 원래 값도 버린다. 남겨두면 그 사이 게임이 이 속성을
+			-- 바꿨을 때 다음 애니메이션이 옛 값을 원래 값으로 알고, 끝날 때
+			-- 게임이 넣은 값을 옛 값으로 덮어쓴다.
+			const snapshot = self._snapshot[instance]
+			if snapshot then
+				snapshot[property] = nil
+				if next(snapshot) == nil then
+					self._snapshot[instance] = nil
+				end
+			end
 		end
 		if next(properties) == nil then
 			self._held[instance] = nil
@@ -259,6 +278,12 @@ function Arbiter:_apply(instance: Instance, property: string, value: any)
 		return
 	end
 	pcall(writeProperty, instance, property, value)
+end
+
+-- 아무 자리도 들고 있지 않은가. 재생이 다 끝나도 마지막으로 잡은 값을
+-- 되돌리는 Flush가 한 번 더 돌아야 해서, 프레임을 멈출지 여기로 판단한다.
+function Arbiter:IsIdle(): boolean
+	return next(self._held) == nil
 end
 
 -- 트랙이 사라졌다. 그 트랙만 들고 있던 자리는 다음 Flush에서 원복된다.

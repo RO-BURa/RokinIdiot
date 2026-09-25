@@ -103,6 +103,7 @@ return {
 	["topbar.export"] = "Workspace에 애니메이션 내보내기",
 	["topbar.exportPlayer"] = "Workspace에 플레이어 내보내기",
 	["topbar.followSelection"] = "고른 키프레임으로 재생헤드 이동",
+	["topbar.deselectOnScrub"] = "재생헤드를 옮기면 키프레임 선택 해제",
 	["topbar.showMarkers"] = "키프레임 줄 보이기",
 	["topbar.deselectWhilePlaying"] = "재생 중 선택 해제",
 

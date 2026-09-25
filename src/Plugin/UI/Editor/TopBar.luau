@@ -267,6 +267,13 @@ function TopBar:_optionItems()
 			end,
 		},
 		{
+			Text = Locale.T("topbar.deselectOnScrub"),
+			Checked = ViewOptions.IsDeselectOnScrubEnabled(),
+			OnSelect = function()
+				ViewOptions.SetDeselectOnScrub(not ViewOptions.IsDeselectOnScrubEnabled())
+			end,
+		},
+		{
 			Text = Locale.T("topbar.showMarkers"),
 			Checked = ViewOptions.AreMarkersVisible(),
 			OnSelect = function()

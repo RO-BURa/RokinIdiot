@@ -138,9 +138,9 @@ const RokinIdiotAnimationTrack = XClass.new(function(self, options)
 	})
 
 	-- 기준 아이템의 처음 위치. 상대 위치 트랙이 이걸 기준으로 편다.
-	-- 재생 내내 한 번만 잡는다. 기준이 움직이는 중에 다시 재면 계속 밀린다.
-	const originItem = self._doc.originItemId and self._items[self._doc.originItemId]
-	self._originCFrame = if originItem then RigResolver.pivotOf(originItem) else nil
+	-- 재생을 시작할 때마다 다시 잡는다 (Play). 불러둔 뒤 캐릭터가 걸어가도
+	-- 지금 선 자리에서 연출이 나와야 한다.
+	self._originCFrame = nil
 end, {
 	--------------------------------------------------------------------------
 	-- 조작
@@ -170,6 +170,11 @@ end, {
 			end
 			self._lastTime = self.TimePosition
 			self.IsPlaying = true
+
+			-- 불러둔 뒤 오브젝트가 바뀌었을 수 있다 (리스폰, 나중에 붙은 파티클).
+			-- 풀어둔 경로와 기준 위치를 새로 잡는다.
+			self._applier:ClearCache()
+			self:_captureOrigin()
 		end
 
 		if self._wake then
@@ -182,10 +187,14 @@ end, {
 			return
 		end
 
+		-- 페이드아웃 중에 또 부르면 페이드 시간만 바꾼다. Stopped는 한 번만 울린다.
+		const alreadyStopping = self._stopping
 		self._stopping = true
 
 		-- 재생은 여기서 끝난다. 아직 값은 들고 있다 (페이드아웃).
-		self.Stopped:Fire()
+		if not alreadyStopping then
+			self.Stopped:Fire()
+		end
 
 		self.WeightTarget = 0
 		self:_startFade(fadeTime or 0)
@@ -312,7 +321,9 @@ end, {
 		self._lastTime = to
 
 		-- 끝까지 갔다. Stop이 Stopped를, 페이드가 끝나면 Ended를 울린다.
-		if not self.Looped and (if backward then to <= 0 else to >= self.Length) then
+		-- 이미 페이드아웃 중이면 끝에 선 채로 페이드가 마저 끝나길 기다린다.
+		-- 여기서 Stop(0)을 부르면 남은 페이드가 뚝 끊긴다.
+		if not self.Looped and not self._stopping and (if backward then to <= 0 else to >= self.Length) then
 			self:Stop(0)
 		end
 	end,
@@ -320,6 +331,20 @@ end, {
 	--------------------------------------------------------------------------
 	-- 안쪽
 	--------------------------------------------------------------------------
+
+	-- 기준 아이템이 지금 선 자리. 재생 내내 이 값 하나로 편다.
+	-- 기준이 움직이는 중에 다시 재면 그 값이 계속 밀려난다.
+	--
+	-- 다른 트랙이 이미 기준 아이템을 옮기고 있으면 그 트랙이 적어둔 원래
+	-- 자리를 쓴다. 옮겨진 자리를 기준으로 삼으면 둘이 서로를 밀어낸다.
+	_captureOrigin = function(self)
+		const originItem = self._doc.originItemId and self._items[self._doc.originItemId]
+		if not originItem then
+			self._originCFrame = nil
+			return
+		end
+		self._originCFrame = self._arbiter:BaseValue(originItem, Applier.PIVOT_KEY) or RigResolver.pivotOf(originItem)
+	end,
 
 	_startFade = function(self, fadeTime: number)
 		if fadeTime <= 0 then
