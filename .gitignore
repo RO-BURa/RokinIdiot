@@ -1,0 +1,13 @@
+# Project place file
+/RokinIdiot.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+# 빌드 산출물
+/RokinIdiot.rbxm
+
+Packages
+
+sourcemap.json

@@ -1,0 +1,12 @@
+{
+    "name": "RokinIdiotAnimationPlayer",
+    "tree": {
+        "$path": "src/RokinIdiotAnimationPlayer",
+        "Core": {
+            "$path": "src/Core"
+        },
+        "Packages": {
+            "$path": "Packages"
+        }
+    }
+}

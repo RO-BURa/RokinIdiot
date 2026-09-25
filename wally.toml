@@ -1,0 +1,10 @@
+[package]
+name = "ro-bura/rokinidiotanimationplayer"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+XClass = "ro-bura/xclass@1.0.3"
+Signal = "ro-bura/signal@0.1.8"
+RobloxStyleObject = "ro-bura/robloxstyleobject@0.1.5"
